@@ -1,2 +1,53 @@
-docker run
-test
+mkdir -p /home/calmarsha3/unifi-video
+mkdir -p /home/calmarsha3/unifi-controller
+chown -R 99:100 /home/calmarsha3/unifi-video
+apt-get install docker.io
+sudo systemctl enable docker
+sudo passwd root
+nano /etc/ssh/sshd_config 
+service sshd restart
+#PermitRootLogin yes
+Mkdir /external
+fdisk -l
+mount /dev/sdb5 /external
+pwd
+
+
+docker run -d \
+--restart=always \
+--network="host" \
+--name unifi-video \
+--security-opt apparmor:unconfined \
+--cap-add SYS_ADMIN \
+--cap-add DAC_READ_SEARCH \
+-p 10001:10001 \
+-p 1935:1935 \
+-p 6666:6666 \
+-p 7080:7080 \
+-p 7442:7442 \
+-p 7443:7443 \
+-p 7444:7444 \
+-p 7445:7445 \
+-p 7446:7446 \
+-p 7447:7447 \
+-v /home/calmarsha3/unifi-video:/var/lib/unifi-video \
+-e TZ=America/Los_Angeles \
+-e PUID=99 \
+-e PGID=100 \
+-e DEBUG=1 \
+pducharme/unifi-video-controller:latest
+
+docker run -d \
+--restart=always \
+--name unifi-controller \
+--network="host" \
+-p 8080:8080 \
+-p 8443:8443 \
+-p 3478:3478/udp \
+-p 10001:10001/udp \
+-v /home/calmarsha3/unifi-controller/Data:/var/lib/unifi \
+-e TZ=America/Los_Angeles \
+-e PUID=99 \
+-e PGID=100 \
+-e DEBUG=1 \
+jacobalberty/unifi:stable
